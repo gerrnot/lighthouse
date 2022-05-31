@@ -131,16 +131,24 @@ func makePipelineRun(ctx context.Context, lj v1alpha1.LighthouseJob, breakpoints
 			}
 		}
 	}
+	alreadyUsedKeys := map[string]bool{}
 	for _, key := range sets.StringKeySet(env).List() {
 		val := env[key]
-		// TODO: make this handle existing values/substitutions.
-		p.Spec.Params = append(p.Spec.Params, tektonv1beta1.Param{
+		logger.Debugf("Handling PipelineRun param: %s: %s", key, val)
+		param := tektonv1beta1.Param{
 			Name: key,
 			Value: tektonv1beta1.ArrayOrString{
 				Type:      tektonv1beta1.ParamTypeString,
 				StringVal: val,
 			},
-		})
+		}
+		if !alreadyUsedKeys[key] {
+			logger.Debugf("Appending Param %s: %s", key, val)
+			p.Spec.Params = append(p.Spec.Params, param)
+			alreadyUsedKeys[key] = true
+		} else {
+			logger.Debugf("Skipping Param %s: %s as it already existed", key, val)
+		}
 	}
 
 	// lets apply any breakpoints...

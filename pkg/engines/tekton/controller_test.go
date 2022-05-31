@@ -57,6 +57,7 @@ func TestReconcile(t *testing.T) {
 		"start-pullrequest",
 		"start-batch-pullrequest",
 		"start-push",
+		"custom-params",
 	}
 
 	for _, tc := range testCases {
